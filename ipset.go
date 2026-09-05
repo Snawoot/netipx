@@ -384,12 +384,13 @@ func (s *IPSet) Contains(ip netip.Addr) bool {
 
 // ContainsRange reports whether all IPs in r are in s.
 func (s *IPSet) ContainsRange(r IPRange) bool {
-	for _, x := range s.rr {
-		if r.coveredBy(x) {
-			return true
-		}
+	i := sort.Search(len(s.rr), func(i int) bool {
+		return r.from.Less(s.rr[i].from)
+	})
+	if i == 0 {
+		return false
 	}
-	return false
+	return r.coveredBy(s.rr[i-1])
 }
 
 // ContainsPrefix reports whether all IPs in p are in s.
