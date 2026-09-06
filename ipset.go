@@ -402,10 +402,8 @@ func (s *IPSet) ContainsPrefix(p netip.Prefix) bool {
 func (s *IPSet) Overlaps(b *IPSet) bool {
 	// TODO: sorted ranges lets us do this in O(n+m)
 	for _, r := range s.rr {
-		for _, or := range b.rr {
-			if r.Overlaps(or) {
-				return true
-			}
+		if b.OverlapsRange(r) {
+			return true
 		}
 	}
 	return false
