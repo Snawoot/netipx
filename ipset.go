@@ -413,13 +413,16 @@ func (s *IPSet) Overlaps(b *IPSet) bool {
 
 // OverlapsRange reports whether any IP in r is also in s.
 func (s *IPSet) OverlapsRange(r IPRange) bool {
-	// TODO: sorted ranges lets us do this more efficiently.
-	for _, x := range s.rr {
-		if x.Overlaps(r) {
-			return true
-		}
+	i := sort.Search(len(s.rr), func(i int) bool {
+		return r.from.Less(s.rr[i].from)
+	})
+	if i == 0 {
+		return s.rr[i].Overlaps(r)
 	}
-	return false
+	if i == len(s.rr) {
+		return s.rr[i-1].Overlaps(r)
+	}
+	return s.rr[i].Overlaps(r) || s.rr[i-1].Overlaps(r)
 }
 
 // OverlapsPrefix reports whether any IP in p is also in s.
